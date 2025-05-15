@@ -1,33 +1,52 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-const vscode = require('vscode');
-
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+const vscode = require('vscode')
+const path = require('path')
+const fs = require('fs')
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "universal-file-vscode-extension" is now active!');
+	const disposable = vscode.commands.registerCommand('kaliber-universal-file-vscode-extension.universalFile', function () {
+		const editor = vscode.window.activeTextEditor
+		if (!editor) {
+			vscode.window.showInformationMessage('No editor is active')
+			return
+		}
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('universal-file-vscode-extension.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
+		const currentFilePath = editor.document.fileName
+		const dir = path.dirname(currentFilePath)
+		const extension = path.extname(currentFilePath)
+		const baseName = capitalizeFirstLetter(path.basename(currentFilePath, extension))
+		const newFileName = `${baseName}.universal${extension}`
+		const newPathName = path.join(dir, newFileName)
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from universal-file-vscode-extension!');
-	});
+		const text = `export { ${baseName} as default } from './${baseName}'`
+
+		vscode.window.showInformationMessage(text)
+
+		if (!fs.existsSync(newPathName)) {
+			try {
+				fs.writeFileSync(newPathName, text)
+				const openPath = vscode.Uri.file(newPathName)
+				vscode.workspace.openTextDocument(openPath).then(doc => {
+					vscode.window.showTextDocument(doc)
+				})
+			} catch (err) {
+				vscode.window.showErrorMessage(`Error creating file: ${err.message}`)
+			}
+		} else {
+			vscode.window.showInformationMessage(`${newFileName} already exists`)
+		}
+	})
+
+	function capitalizeFirstLetter(string) {
+		return string.charAt(0).toUpperCase() + string.slice(1)
+	}
 
 	context.subscriptions.push(disposable);
 }
 
-// This method is called when your extension is deactivated
 function deactivate() {}
 
 module.exports = {

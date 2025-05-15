@@ -9,18 +9,23 @@
   "categories": [
     "Other"
   ],
+  "repository": {
+		"type": "git",
+		"url": "https://github.com/melissabos18/universal-file-vscode-extension"
+	},
   "activationEvents": [],
   "main": "./extension.js",
   "contributes": {
     "commands": [{
-      "command": "universal-file-vscode-extension.helloWorld",
-      "title": "Hello World"
+      "command": "universal-file-vscode-extension.universalFile",
+      "title": "Create universal file"
     }]
   },
   "scripts": {
     "lint": "eslint .",
     "pretest": "yarn run lint",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "package": "vsce package --out dist/extension.vsix"
   },
   "devDependencies": {
     "@types/vscode": "^1.100.0",
